@@ -46,18 +46,23 @@ public class SecurityConfig {
                 // 세션을 사용하지 않는 'STATELESS' 정책으로 설정 (든 요청이 토큰을 통해 인증되어야 함을 의미)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                // Exception Handling 설정
-                .exceptionHandling(e -> e
-                        .authenticationEntryPoint(jwtAuthenticationEntryPoint) // 인증 실패
-                        .accessDeniedHandler(jwtAccessDeniedHandler) // 인가 실패
-                )
-
                 // HTTP 요청에 대한 접근 권한 설정
                 .authorizeHttpRequests(authz -> authz
                         // 인증 없이도 접근을 허용할 API 명시
                         .requestMatchers("/api/v1/auth/refresh", "/api/v1/auth/token", "/api/v1/auth/logout").permitAll() // auth 관련
                         .requestMatchers("/", "/login/**", "/oauth2/**").permitAll() // 소셜 로그인 관련
+                        .requestMatchers("/api/v1/user/for-user").hasAuthority("ROLE_USER")
+                        
+                        // accessDeniedHandler에서 sendError의 경우 내부적인 `/error` 경로로 요청 처리
+                        // `/error` 의 경우에도 인증 확인 절차가 이루어져 403 떠야하는 상황에 401 뜨는 것 방지하기 위해
+                        .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated()) // 나머지 요청은 모두 인증 필요
+
+                // Exception Handling 설정
+                .exceptionHandling(e -> e
+                        .authenticationEntryPoint(jwtAuthenticationEntryPoint) // 인증 실패
+                        .accessDeniedHandler(jwtAccessDeniedHandler) // 인가 실패
+                )
 
                 // OAuth2 로그인 설정
                 .oauth2Login(oauth2 -> oauth2

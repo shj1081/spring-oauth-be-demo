@@ -9,10 +9,10 @@ with a single-page application (SPA) client, providing a robust backend for user
   provider.
 - **JWT Implementation**: Issues short-lived Access Tokens and long-lived Refresh Tokens for a stateless architecture.
 - **Advanced Token Security**:
-  - **Refresh Token Rotation**: Automatically invalidates and re-issues refresh tokens upon use to enhance security.
-  - **HttpOnly Cookies**: Stores Refresh Tokens in secure, HttpOnly cookies to prevent XSS attacks.
-  - **Redis Integration**: Manages Refresh Tokens on the server-side using Redis for high performance and automatic
-    expiration (TTL).
+    - **Refresh Token Rotation**: Automatically invalidates and re-issues refresh tokens upon use to enhance security.
+    - **HttpOnly Cookies**: Stores Refresh Tokens in secure, HttpOnly cookies to prevent XSS attacks.
+    - **Redis Integration**: Manages Refresh Tokens on the server-side using Redis for high performance and automatic
+      expiration (TTL).
 - **Stateless Architecture**: No HTTP sessions are used; authentication is managed entirely through JWTs.
 - **Global Exception Handling**: Centralized handling of authentication, authorization, and business logic exceptions
   for consistent API responses.
@@ -42,13 +42,15 @@ with a single-page application (SPA) client, providing a robust backend for user
 1. Go to [GitHub Developer Settings](https://github.com/settings/developers)
 2. Click "New OAuth App"
 3. Fill in the application details:
-   - **Application name**: Your app name
-   - **Homepage URL**: `http://localhost:8080`
-   - **Authorization callback URL**: `http://localhost:8080/login/oauth2/code/github`
+    - **Application name**: Your app name
+    - **Homepage URL**: `http://localhost:8080`
+    - **Authorization callback URL**: `http://localhost:8080/login/oauth2/code/github`
 4. Click "Register application"
 5. Copy the **Client ID** and generate a **Client Secret**
 
-> **Note**: This server is designed to work with a frontend application running on `http://localhost:3000`. After successful OAuth authentication, users will be redirected to `http://localhost:3000/oauth/redirect` with a temporary authorization code.
+> **Note**: This server is designed to work with a frontend application running on `http://localhost:3000`. After
+> successful OAuth authentication, users will be redirected to `http://localhost:3000/oauth/redirect` with a temporary
+> authorization code.
 
 ### Installation & Configuration
 
@@ -112,7 +114,8 @@ The containers will persist data until you run `docker-compose down -v` (the `-v
      auth-code-expiry: 60000 # 5 minutes
    ```
 
-   **Note**: If you're using the provided Docker Compose setup, the database credentials are already configured correctly. You only need to add your GitHub OAuth credentials and JWT secret.
+   **Note**: If you're using the provided Docker Compose setup, the database credentials are already configured
+   correctly. You only need to add your GitHub OAuth credentials and JWT secret.
 
 4. Make sure your `application.yml` file is configured to import the secrets file:
    ```yaml
@@ -154,7 +157,8 @@ The containers will persist data until you run `docker-compose down -v` (the `-v
 
 ### Database Setup
 
-The application uses JPA with Hibernate and is configured to automatically create/update database tables (`ddl-auto: update`). When you start the application for the first time:
+The application uses JPA with Hibernate and is configured to automatically create/update database tables (
+`ddl-auto: update`). When you start the application for the first time:
 
 1. The database tables will be automatically created
 2. User data will be stored in the `user` table with fields: `id`, `name`, `email`, `picture`, `role`
@@ -193,6 +197,8 @@ The server provides these endpoints for the client:
 ### Protected Endpoints
 
 - `GET /api/v1/user/me` - Gets the authenticated user's profile information
+- `GET /api/v1/user/for-user` - check if the user has role of `USER` not the `GUEST` (the change of role can be
+  reflected only when login again or refresh access token)
 
 ### Authentication Flow Details
 
@@ -211,7 +217,8 @@ The server provides these endpoints for the client:
   client-side JavaScript and mitigating XSS risks.
 - **Server-Side Validation**: Refresh tokens are stored and validated against Redis, allowing the server to invalidate
   sessions at any time.
-- **Temporary Authorization Codes**: Initial OAuth success creates a short-lived temporary code (5 minutes TTL) that must be exchanged for tokens, adding an extra security layer.
+- **Temporary Authorization Codes**: Initial OAuth success creates a short-lived temporary code (5 minutes TTL) that
+  must be exchanged for tokens, adding an extra security layer.
 - **Stateless by Design**: The server does not rely on HTTP sessions, making it scalable and robust.
 - **CORS Configuration**: Configured to allow requests from `http://localhost:3000` for frontend integration.
 - **Role-Based Access Control**: Users have roles (GUEST, USER) for fine-grained permission management.
@@ -257,7 +264,8 @@ src/main/java/dev/hyzoon/oauth_test/
 ### Key Components
 
 - **JwtAuthenticationFilter**: Validates JWT tokens in request headers and sets authentication context
-- **OAuth2AuthenticationSuccessHandler**: Handles successful OAuth2 login, creates temporary codes and stores tokens in Redis
+- **OAuth2AuthenticationSuccessHandler**: Handles successful OAuth2 login, creates temporary codes and stores tokens in
+  Redis
 - **TokenProvider**: Generates and validates JWT tokens (Access & Refresh tokens)
 - **CustomOAuth2UserService**: Processes OAuth2 user information and creates/updates user records
 - **AuthService**: Handles token exchange, refresh, and logout operations
@@ -276,7 +284,8 @@ src/main/java/dev/hyzoon/oauth_test/
 
 1. **JWT Secret Too Short**: Ensure your JWT secret is at least 64 bytes (512 bits) long
 2. **CORS Errors**: Frontend must run on `http://localhost:3000` or update CORS configuration in `SecurityConfig.java`
-3. **GitHub OAuth Callback Mismatch**: Verify the callback URL in GitHub OAuth app matches `http://localhost:8080/login/oauth2/code/github`
+3. **GitHub OAuth Callback Mismatch**: Verify the callback URL in GitHub OAuth app matches
+   `http://localhost:8080/login/oauth2/code/github`
 4. **Redis Connection Failed**: Ensure Redis is running on port 6379 or update the configuration
 5. **MySQL Connection Failed**: Check if MySQL is running and the database `oauth-test` exists
 

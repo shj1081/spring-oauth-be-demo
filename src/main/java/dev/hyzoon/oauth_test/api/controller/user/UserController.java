@@ -24,4 +24,11 @@ public class UserController {
         }
         return ResponseEntity.ok(Map.of("email", user.getUsername()));
     }
+
+    // 권한에 따른 인가 테스팅용
+    // 빠른 확인을 위해 access-token-expiry를 매우 짧게 변경해볼 수 있음
+    @GetMapping("/for-user")
+    public ResponseEntity<Map<String, String>> getUserOnlyData() {
+        return ResponseEntity.ok(Map.of("message", "You are in the USER role."));
+    }
 }
