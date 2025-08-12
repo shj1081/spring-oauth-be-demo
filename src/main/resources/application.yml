@@ -1,0 +1,18 @@
+# 서버 포트 설정
+server:
+  port: 8080
+
+# JPA 및 Hibernate 설정
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+
+  # 설정 파일 import
+  # optional: 접두사를 붙이면 파일이 없어도 에러 없이 애플리케이션이 실행됨
+  config:
+    import: optional:secret.yml
