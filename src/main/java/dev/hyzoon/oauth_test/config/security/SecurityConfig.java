@@ -52,7 +52,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/auth/refresh", "/api/v1/auth/token", "/api/v1/auth/logout").permitAll() // auth 관련
                         .requestMatchers("/", "/login/**", "/oauth2/**").permitAll() // 소셜 로그인 관련
                         .requestMatchers("/api/v1/user/for-user").hasAuthority("ROLE_USER")
-                        
+
                         // accessDeniedHandler에서 sendError의 경우 내부적인 `/error` 경로로 요청 처리
                         // `/error` 의 경우에도 인증 확인 절차가 이루어져 403 떠야하는 상황에 401 뜨는 것 방지하기 위해
                         .requestMatchers("/error").permitAll()

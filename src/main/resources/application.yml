@@ -16,3 +16,9 @@ spring:
   # optional: 접두사를 붙이면 파일이 없어도 에러 없이 애플리케이션이 실행됨
   config:
     import: optional:secret.yml
+
+
+## 로깅 관련
+#logging:
+#  level:
+#    org.springframework.security: DEBUG
