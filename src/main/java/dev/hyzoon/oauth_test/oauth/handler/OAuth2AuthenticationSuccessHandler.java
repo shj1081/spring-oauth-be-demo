@@ -1,9 +1,9 @@
 package dev.hyzoon.oauth_test.oauth.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.hyzoon.oauth_test.config.properties.JwtProperties;
-import dev.hyzoon.oauth_test.oauth.token.TokenDto;
-import dev.hyzoon.oauth_test.oauth.token.TokenProvider;
+import dev.hyzoon.oauth_test.auth.JwtTokenProvider;
+import dev.hyzoon.oauth_test.auth.dto.JwtTokenDto;
+import dev.hyzoon.oauth_test.global.config.JwtProperties;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +29,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     public static final String REFRESH_TOKEN_COOKIE_NAME = "refresh_token";
 
-    private final TokenProvider tokenProvider;
+    private final JwtTokenProvider jwtTokenProvider;
     private final RedisTemplate<String, String> redisTemplate;
     private final JwtProperties jwtProperties;
     private final ObjectMapper objectMapper;
@@ -46,18 +46,18 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                 .collect(Collectors.joining(","));
 
         // 토큰 DTO 생성
-        TokenDto tokenDto = tokenProvider.generateTokenDto(email, authorities);
+        JwtTokenDto jwtTokenDto = jwtTokenProvider.generateTokenDto(email, authorities);
 
         // 최초 교환을 위해, 임시 코드와 함께 토큰 DTO를 Redis에 저장 (짧은 만료 시간)
         String authCode = UUID.randomUUID().toString();
-        String tokenDtoJson = objectMapper.writeValueAsString(tokenDto); // TokenDto를 JSON 문자열로 변환
+        String tokenDtoJson = objectMapper.writeValueAsString(jwtTokenDto); // TokenDto를 JSON 문자열로 변환
         long authCodeExpiry = jwtProperties.getAuthCodeExpiry();
         redisTemplate.opsForValue().set("auth_code:" + authCode, tokenDtoJson, authCodeExpiry, TimeUnit.MILLISECONDS);
         log.info("Temporary auth_code-token pair stored in Redis. code ={} TTL: {}s", authCode, authCodeExpiry / 1000);
 
         // Refresh Token 을 이메일과 함께 Redis에 저장 (긴 만료 시간)
         long refreshTokenExpiry = jwtProperties.getRefreshTokenExpiry();
-        redisTemplate.opsForValue().set(email, tokenDto.getRefreshToken(), refreshTokenExpiry, TimeUnit.MILLISECONDS);
+        redisTemplate.opsForValue().set(email, jwtTokenDto.getRefreshToken(), refreshTokenExpiry, TimeUnit.MILLISECONDS);
         log.info("Permanent Refresh Token stored in Redis for {}. TTL: {}s", email, refreshTokenExpiry / 1000);
 
         // 프론트엔드로는 임시 코드만 포함하여 redirection

@@ -9,10 +9,10 @@ with a single-page application (SPA) client, providing a robust backend for user
   provider.
 - **JWT Implementation**: Issues short-lived Access Tokens and long-lived Refresh Tokens for a stateless architecture.
 - **Advanced Token Security**:
-    - **Refresh Token Rotation**: Automatically invalidates and re-issues refresh tokens upon use to enhance security.
-    - **HttpOnly Cookies**: Stores Refresh Tokens in secure, HttpOnly cookies to prevent XSS attacks.
-    - **Redis Integration**: Manages Refresh Tokens on the server-side using Redis for high performance and automatic
-      expiration (TTL).
+  - **Refresh Token Rotation**: Automatically invalidates and re-issues refresh tokens upon use to enhance security.
+  - **HttpOnly Cookies**: Stores Refresh Tokens in secure, HttpOnly cookies to prevent XSS attacks.
+  - **Redis Integration**: Manages Refresh Tokens on the server-side using Redis for high performance and automatic
+    expiration (TTL).
 - **Stateless Architecture**: No HTTP sessions are used; authentication is managed entirely through JWTs.
 - **Global Exception Handling**: Centralized handling of authentication, authorization, and business logic exceptions
   for consistent API responses.
@@ -42,9 +42,9 @@ with a single-page application (SPA) client, providing a robust backend for user
 1. Go to [GitHub Developer Settings](https://github.com/settings/developers)
 2. Click "New OAuth App"
 3. Fill in the application details:
-    - **Application name**: Your app name
-    - **Homepage URL**: `http://localhost:8080`
-    - **Authorization callback URL**: `http://localhost:8080/login/oauth2/code/github`
+   - **Application name**: Your app name
+   - **Homepage URL**: `http://localhost:8080`
+   - **Authorization callback URL**: `http://localhost:8080/login/oauth2/code/github`
 4. Click "Register application"
 5. Copy the **Client ID** and generate a **Client Secret**
 
@@ -234,42 +234,53 @@ injection for easy testing and maintenance.
 
 ```
 src/main/java/dev/hyzoon/oauth_test/
-├── api/
-│   ├── controller/          # REST Controllers
-│   │   ├── auth/           # Authentication endpoints (/api/v1/auth/*)
-│   │   └── user/           # User profile endpoints (/api/v1/user/*)
-│   ├── exception/          # Global exception handling
-│   │   ├── GlobalExceptionHandler.java
-│   │   └── InvalidRefreshTokenException.java
-│   └── service/            # Business logic services
-│       └── auth/           # Authentication business logic
-├── config/
-│   ├── properties/         # Configuration properties (JWT settings)
-│   ├── redis/             # Redis configuration
-│   └── security/          # Security configuration (CORS, JWT filter, OAuth2)
-├── domain/
-│   └── user/              # User entity and role enum
-├── oauth/
-│   ├── dto/               # OAuth2 DTOs (GitHub user info)
-│   ├── factory/           # OAuth2 user info factory
-│   ├── filter/            # JWT authentication filter
-│   ├── handler/           # OAuth2 success/failure handlers, JWT error handlers
-│   ├── service/           # OAuth2 services (Custom user service)
-│   └── token/             # Token management (TokenDto, TokenProvider)
-├── repository/
-│   └── user/              # Data access layer (JPA repository)
-└── util/                  # Utility classes (Cookie utilities)
+├── auth/                    # Authentication domain
+│   ├── AuthController.java         # Authentication REST endpoints (/api/v1/auth/*)
+│   ├── AuthService.java            # Authentication business logic
+│   ├── JwtTokenProvider.java       # JWT token generation and validation
+│   ├── dto/                        # Authentication DTOs
+│   │   └── JwtTokenDto.java        # JWT token transfer object
+│   ├── filter/                     # Authentication filters
+│   │   └── JwtAuthenticationFilter.java  # JWT token validation filter
+│   └── handler/                    # Authentication handlers
+│       ├── JwtAccessDeniedHandler.java   # JWT access denied handler
+│       └── JwtAuthenticationEntryPoint.java  # JWT authentication entry point
+├── global/                  # Global/shared components
+│   ├── config/                     # Application configuration
+│   │   ├── JwtProperties.java      # JWT configuration properties
+│   │   ├── RedisConfig.java        # Redis configuration
+│   │   └── SecurityConfig.java     # Security configuration (CORS, filters, OAuth2)
+│   ├── exception/                  # Global exception handling
+│   │   ├── GlobalExceptionHandler.java    # Centralized exception handler
+│   │   └── InvalidRefreshTokenException.java  # Custom exceptions
+│   └── util/                       # Utility classes
+│       └── CookieUtil.java         # Cookie management utilities
+├── oauth/                   # OAuth2 domain
+│   ├── CustomOAuth2UserService.java       # OAuth2 user service
+│   ├── OAuth2UserInfoFactory.java         # OAuth2 user info factory
+│   ├── dto/                        # OAuth2 DTOs
+│   │   ├── GithubUserInfo.java     # GitHub user information DTO
+│   │   └── OAuth2UserInfo.java     # OAuth2 user info interface
+│   └── handler/                    # OAuth2 handlers
+│       ├── OAuth2AuthenticationFailureHandler.java  # OAuth2 failure handler
+│       └── OAuth2AuthenticationSuccessHandler.java  # OAuth2 success handler
+└── user/                    # User domain
+    ├── UserController.java         # User profile endpoints (/api/v1/user/*)
+    ├── UserRepository.java         # User data access layer (JPA repository)
+    └── domain/                     # User domain entities
+        ├── User.java               # User entity
+        └── UserRole.java           # User role enum
 ```
 
 ### Key Components
 
-- **JwtAuthenticationFilter**: Validates JWT tokens in request headers and sets authentication context
-- **OAuth2AuthenticationSuccessHandler**: Handles successful OAuth2 login, creates temporary codes and stores tokens in
-  Redis
-- **TokenProvider**: Generates and validates JWT tokens (Access & Refresh tokens)
-- **CustomOAuth2UserService**: Processes OAuth2 user information and creates/updates user records
-- **AuthService**: Handles token exchange, refresh, and logout operations
-- **SecurityConfig**: Configures Spring Security with OAuth2, JWT, and CORS settings
+- **JwtAuthenticationFilter** (`auth/filter/`): Validates JWT tokens in request headers and sets authentication context
+- **OAuth2AuthenticationSuccessHandler** (`oauth/handler/`): Handles successful OAuth2 login, creates temporary codes and stores tokens in Redis
+- **JwtTokenProvider** (`auth/`): Generates and validates JWT tokens (Access & Refresh tokens)
+- **CustomOAuth2UserService** (`oauth/`): Processes OAuth2 user information and creates/updates user records
+- **AuthService** (`auth/`): Handles token exchange, refresh, and logout operations
+- **SecurityConfig** (`global/config/`): Configures Spring Security with OAuth2, JWT, and CORS settings
+- **GlobalExceptionHandler** (`global/exception/`): Centralized exception handling for consistent API responses
 
 ### Build & Run
 
