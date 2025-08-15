@@ -39,13 +39,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         User user = saveOrUpdate(oAuth2UserInfo);
 
         // Spring Security가 사용할 최종 OAuth2User 객체 생성 및 반환
-        // userNameAttributeName = OAuth 2.0 로그인 성공 시 사용자를 식별하는 기준이 되는 키 값
-        String userNameAttributeName = userRequest.getClientRegistration()
-                .getProviderDetails().getUserInfoEndpoint().getUserNameAttributeName();
+//        String userNameAttributeName = userRequest.getClientRegistration()
+//                .getProviderDetails().getUserInfoEndpoint().getUserNameAttributeName();
+        String emailAttributeName = "email";
         return new DefaultOAuth2User(
                 Collections.singleton(new SimpleGrantedAuthority(user.getRoleKey())), // DB 에서 조회한 role 을 기반으로 권한을 부여
                 oAuth2UserInfo.getAttributes(), //  OAuth 2.0 제공자로부터 받은 원본 사용자 정보를 그대로
-                userNameAttributeName // 사용자를 식별할 키가 무엇인지
+                emailAttributeName // OAuth 2.0 로그인 성공 시 사용자를 식별하는 기준이 되는 키 값
         );
     }
 

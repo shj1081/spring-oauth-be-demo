@@ -17,7 +17,6 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -38,11 +37,11 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     // @SneakyThrows = ObjectMapper로 객체를 JSON 문자열로 바꾸는 과정에서 `JsonProcessingException` 이라는 Checked Exception을 던질 수 있는데 이의 발생을 무시
     @SneakyThrows
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
-        // Authentication 에서 OAuth2User 객체를 추출하고, 사용자 이메일과 권한 정보를 가져옵
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
+        // Authentication 에서 OAuth2User 객체 (principal) 를 추출하고, 사용자 이메일과 권한 정보를 가져옴
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
         String email = oAuth2User.getAttribute("email");
-        String authorities = authentication.getAuthorities().stream()
+        String authorities = oAuth2User.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
 

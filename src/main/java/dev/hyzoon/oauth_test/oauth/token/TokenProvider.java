@@ -74,6 +74,7 @@ public class TokenProvider {
                         .map(SimpleGrantedAuthority::new)
                         .collect(Collectors.toList());
 
+        // User = Authentication principal 중 하나인 UserDetail의 구현체 중 하나
         User principal = new User(claims.getSubject(), "", authorities);
 
         // UsernamePasswordAuthenticationToken = Authentication 의 구현체 중 하나
